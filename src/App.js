@@ -1,9 +1,12 @@
 import Calendar from './components/Calendar/Calendar'
+import { Box } from '@material-ui/core'
 
 function App() {
   return (
     <div className="App">
-        <Calendar/>
+        <Box p={1}>
+            <Calendar/>
+        </Box>
     </div>
   );
 }

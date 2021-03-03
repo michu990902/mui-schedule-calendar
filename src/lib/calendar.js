@@ -1,14 +1,3 @@
-export const getWeekGrid = (year, month, day) => {
-    let dayInWeek = new Date(year, month-1, day).getDay();
-    let i = 0;
-    let tmp = [];
-    while (i < 7){
-        tmp.push(new Date(year, month-1, day-dayInWeek+i).getDate());
-        i++;
-    }
-    return tmp;
-};
-
 export const getMonthGrid = (year, month) => {
     const date = new Date(year, month, 0);
     const monthLength = date.getDate();
