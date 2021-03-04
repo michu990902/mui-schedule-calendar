@@ -23,17 +23,22 @@ export const getMonthGrid = (year, month) => {
 
     if(firstDay !== 0){
         const tmpDate = new Date(year, month-1, 0);
+        const tmpYear = tmpDate.getFullYear();
+        const tmpMonth = tmpDate.getMonth();
         const lastMonthLength = tmpDate.getDate();
         while(firstDay){
             const day = lastMonthLength - --firstDay;
-            insertDayToWeek(day);
+            insertDayToWeek({ year: tmpYear, month: tmpMonth, day });
         }
     }
 
     let i = 1;
-    while(i < monthLength+1) insertDayToWeek(i++);
+    while(i < monthLength+1) insertDayToWeek({ year, month: month-1, day: i++ });
     i = 1;
-    while(total%7 > 0) insertDayToWeek(i++);
+    const tmpDate = new Date(year, month+1, 0);
+    const tmpYear = tmpDate.getFullYear();
+    const tmpMonth = tmpDate.getMonth();
+    while(total%7 > 0) insertDayToWeek({ year: tmpYear, month: tmpMonth, day: i++ });
 
     return grid;
 };
