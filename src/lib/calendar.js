@@ -42,3 +42,17 @@ export const getMonthGrid = (year, month) => {
 
     return grid;
 };
+
+const addZero = value => ('0'+value).slice(-2);
+
+const timeDiff = (from, to) => {
+    const diffMin = (to - from) / 1000 / 60;
+    const hoursLeft = ~~(diffMin / 60);
+    const minutesLeft = ~~(diffMin % 60);
+    return {
+        diffMin: diffMin,
+        hours: hoursLeft,
+        minutes: minutesLeft,
+        label: `${hoursLeft}:${addZero(minutesLeft)}`,
+    };
+}

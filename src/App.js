@@ -1,5 +1,5 @@
 import Calendar from './components/Calendar/Calendar'
-import Task from './components/Calendar/Task'
+// import Task from './components/Calendar/Task'
 import { Box } from '@material-ui/core'
 
 function App() {
@@ -9,7 +9,7 @@ function App() {
             <Calendar
                 title="Schedule"
             />
-            <Task 
+            {/* <Task 
                 label="test"
                 isDone={false}
             />
@@ -21,7 +21,7 @@ function App() {
             <Task 
                 label="test"
                 isDone={true}
-            />
+            /> */}
         </Box>
     </div>
   );
