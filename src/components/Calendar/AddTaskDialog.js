@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useReducer } from 'react'
 import {
     Dialog,
     DialogTitle,
@@ -28,20 +28,30 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-const AddTaskDialog = ({ isOpen, addFilter, handleClose, columns }) => {
-    const classes = useStyles(); 
-    const [fieldName, setFieldName] = useState('name');
-    const [condition, setCondition] = useState('equal');
-    const [value, setValue] = useState('');
 
-    const handleCondition = ev => {
-        setCondition(ev.target.value);
-    };
+// {
+//     id: 1,
+//     date: "3/5/2021",
+//     startAt: "8:00 AM",
+//     endAt: "9:30 PM",
+//     duration: "1:30",
+//     title: "Test task",
+//     description: "Test task",
+//     color: lightBlue[800],
+//     break: "0:30",
+// },
+// ! TODO
+
+const AddTaskDialog = ({ isOpen, addTask, handleClose, selectedDay }) => {
+    const classes = useStyles(); 
+    const [title, setTitle] = useState('');
+
+    // const handleCondition = ev => {
+    //     setCondition(ev.target.value);
+    // };
 
     const handleOk = () => {
-        const col = columns.find(c => c.id === fieldName);
-        const lbl = getConditions[col.type].find(c => c.id === condition).label;
-        addFilter(col.id, col.label, col.type, condition, lbl, value);
+        // addTask(...)
         handleClose();
     };
 

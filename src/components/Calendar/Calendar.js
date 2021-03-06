@@ -9,22 +9,15 @@ import {
     IconButton,
     ButtonGroup
 } from '@material-ui/core'
-import {
-    Timeline,
-    TimelineItem,
-    TimelineOppositeContent,
-    TimelineSeparator,
-    TimelineDot,
-    TimelineConnector,
-    TimelineContent
-} from '@material-ui/lab'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import { getMonthGrid } from '../../lib/calendar'
 
 import AddIcon from '@material-ui/icons/Add'
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore'
 import NavigateNextIcon from '@material-ui/icons/NavigateNext'
-import { teal, lightBlue, cyan, lightGreen, red, brown, grey, purple, pink, orange } from '@material-ui/core/colors';
+import { teal, lightBlue, cyan, lightGreen, red, brown, grey, purple, pink, orange } from '@material-ui/core/colors'
+
+import CalendarDay from './CalendarDay'
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -159,6 +152,7 @@ const tasks = [
         title: "Test task",
         description: "Test task",
         color: lightBlue[800],
+        break: "0:30",
     },
     {
         id: 2,
@@ -179,6 +173,7 @@ const tasks = [
         title: "Test task 3",
         description: "Test task 3",
         color: teal[700],
+        break: "0:15",
     },
     {
         id: 4,
@@ -299,73 +294,24 @@ const Calendar = ({ title }) => {
 
     const getGrid = {
         "day": (
-            <div>
-                <Paper className={classes.weekDay}>
-                    <div className={isCurrDate({ year, month, day }) ? classes.selectedDayRing : classes.dayRing}>
-                        {day}
-                    </div>
-                    
-                    {/* <Typography variant="h3" component="p">:(</Typography>
-                    There is nothing to do here */}
-                    {/* <div className={classes.break}>
-                        0:15
-                    </div> */}
-                    <Timeline>
-                        {tasks && tasks.map((t, id) => (
-                            <>
-                            <TimelineItem>
-                                <TimelineOppositeContent>
-                                    <Typography color="textSecondary">{`${t.startAt} - ${t.endAt} (${t.duration})`}</Typography>
-                                </TimelineOppositeContent>
-                                <TimelineSeparator>
-                                    {id === 3 
-                                    ? <TimelineDot className={classes.timeNowDot}/> 
-                                    : <TimelineDot/>}
-                                    <TimelineConnector/>
-                                </TimelineSeparator>
-                                <TimelineContent>
-                                    <Paper 
-                                        className={classes.task} 
-                                        style={{ 
-                                            backgroundColor: t.color, 
-                                            color: theme.palette.getContrastText(t.color) 
-                                        }}
-                                    >
-                                        <Typography variant="h6" component="h1">{t.title}</Typography>
-                                        <Typography>{t.description}</Typography>
-                                    </Paper>
-                                </TimelineContent>
-                            </TimelineItem>
-                            <TimelineItem>
-                                <TimelineOppositeContent>
-                                    <Typography>Break</Typography>
-                                </TimelineOppositeContent>
-                                <TimelineSeparator>
-                                    <TimelineDot />
-                                    <TimelineConnector />
-                                </TimelineSeparator>
-                                <TimelineContent>
-                                    <Typography align="left">0:30</Typography>
-                                </TimelineContent>
-                            </TimelineItem>
-                            </>
-                        ))}
-                    </Timeline>
-                </Paper>
-            </div>
+            <CalendarDay
+                day={day}
+                isCurrentDate={isCurrDate({ year, month, day })}
+                tasks={tasks}
+            />
         ),
         "3days": (
-            <div>
-                <div className={classes.calendarWrapper3}>
-                    {info3Days.map((d, id) => <Typography key={id} align="center">{dayNames[d.getDay()]}</Typography>)}
-                    {grid3Days.map((d, id) => (
-                        <Paper key={id} className={classes.weekDay}>
-                            <div className={isCurrDate(d) ? classes.selectedDayRing : classes.dayRing}>
-                                {d.day}
-                            </div>
-                            {tasks && tasks.map(t => (
-                                <>
-                                <Paper 
+            <div className={classes.calendarWrapper3}>
+                {info3Days.map((d, id) => <Typography key={id} align="center">{dayNames[d.getDay()]}</Typography>)}
+                {grid3Days.map((d, id) => (
+                    <Paper key={id} className={classes.weekDay}>
+                        <div className={isCurrDate(d) ? classes.selectedDayRing : classes.dayRing}>
+                            {d.day}
+                        </div>
+                        {tasks && tasks.map(t => (
+                            <>
+                                <Paper
+                                    key={t.id}
                                     className={classes.task} 
                                     style={{ 
                                         backgroundColor: t.color, 
@@ -375,68 +321,62 @@ const Calendar = ({ title }) => {
                                     <Typography variant="body2">{t.title}</Typography>
                                     <Typography variant="caption">{`${t.startAt} - ${t.endAt} (${t.duration})`}</Typography>
                                 </Paper>
-                                
-                                <div className={classes.break}>
-                                    0:15
-                                </div>
-                                </>
-                            ))}
-                        </Paper>
-                    ))}
-                </div>
+                                {t.break && <div className={classes.break}>{t.break}</div>}
+                            </>
+                        ))}
+                    </Paper>
+                ))}
             </div>
         ),
         "week": (
-            <div>
-                <div className={classes.calendarWrapper7}>
-                    {dayNames.map((d, id) => <Typography key={id} align="center">{d}</Typography>)}
-                    {gridWeek.map((d, id) => (
-                        <Paper key={id} className={classes.weekDay}>
-                            <div className={isCurrDate(d) ? classes.selectedDayRing : classes.dayRing}
+            <div className={classes.calendarWrapper7}>
+                {dayNames.map((d, id) => <Typography key={id} align="center">{d}</Typography>)}
+                {gridWeek.map((d, id) => (
+                    <Paper key={id} className={classes.weekDay}>
+                        <div className={isCurrDate(d) ? classes.selectedDayRing : classes.dayRing}
+                        >
+                            {d.day}
+                        </div>
+                        {tasks && tasks.map(t => (
+                            <Paper
+                                key={t.id}
+                                className={classes.task} 
+                                style={{ 
+                                    backgroundColor: t.color, 
+                                    color: theme.palette.getContrastText(t.color) 
+                                }}
                             >
-                                {d.day}
-                            </div>
-                            {tasks && tasks.map(t => (
-                                <Paper 
-                                    className={classes.task} 
-                                    style={{ 
-                                        backgroundColor: t.color, 
-                                        color: theme.palette.getContrastText(t.color) 
-                                    }}
-                                >
-                                    <Typography variant="body2">{t.title}</Typography>
-                                    <Typography variant="caption">{`${t.startAt} - ${t.endAt} (${t.duration})`}</Typography>
-                                </Paper>
-                            ))}
-                        </Paper>
-                    ))}
-                </div>
+                                <Typography variant="body2">{t.title}</Typography>
+                                <Typography variant="caption">{`${t.startAt} - ${t.endAt} (${t.duration})`}</Typography>
+                            </Paper>
+                        ))}
+                    </Paper>
+                ))}
             </div>
         ),
         "month": (
-            <div>
-                <div className={classes.calendarWrapper7}>
-                    {dayNames.map((d, id) => <Typography key={id} align="center">{d}</Typography>)}
-                    {gridMonth.flat().map((d, id) => (
-                        <Paper key={id} className={classes.monthDay}>
-                            <div className={isCurrDate(d) ? classes.selectedDayRing : classes.dayRing}
+            <div className={classes.calendarWrapper7}>
+                {dayNames.map((d, id) => <Typography key={id} align="center">{d}</Typography>)}
+                {gridMonth.flat().map((d, id) => (
+                    <Paper key={id} className={classes.monthDay}>
+                        <div className={isCurrDate(d) ? classes.selectedDayRing : classes.dayRing}
+                        >
+                            {d.day}
+                        </div>
+                        {tasks && tasks.map(t => (
+                            <Paper 
+                                key={t.id}
+                                className={classes.task} 
+                                style={{ 
+                                    backgroundColor: t.color, 
+                                    color: theme.palette.getContrastText(t.color) 
+                                }}
                             >
-                                {d.day}
-                            </div>
-                            {tasks && tasks.map(t => (
-                                <Paper 
-                                    className={classes.task} 
-                                    style={{ 
-                                        backgroundColor: t.color, 
-                                        color: theme.palette.getContrastText(t.color) 
-                                    }}
-                                >
-                                    <Typography variant="caption">{`${t.startAt} - ${t.title}`}</Typography>
-                                </Paper>
-                            ))}
-                        </Paper>
-                    ))}
-                </div>
+                                <Typography variant="caption">{`${t.startAt} - ${t.title}`}</Typography>
+                            </Paper>
+                        ))}
+                    </Paper>
+                ))}
             </div>
         ),
     }
