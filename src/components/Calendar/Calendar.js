@@ -19,6 +19,7 @@ import { teal, lightBlue, cyan, lightGreen, red, brown, grey, purple, pink, oran
 
 import CalendarDay from './CalendarDay'
 import AddTaskDialog from './AddTaskDialog'
+import { timeDiff } from '../../lib/calendar'
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -294,6 +295,22 @@ const Calendar = ({ title }) => {
         setSelectedDate(new Date());
     }
 
+    
+    const groupTasks = tasks.reduce((total, curr, id) => {
+        const prevTask = total[id-1];
+        if(prevTask){
+            const diff = timeDiff(prevTask.endAt, curr.startAt);
+            if(diff.hours > 0 || diff.minutes > 15){ // only > 15 minutes breaks
+                curr.break = diff.label;
+            }
+        }
+        return [...total, curr];
+    }, []).reduce((total, curr) => {
+        const id = `${curr.startAt.getDate()}/${curr.startAt.getMonth()}/${curr.startAt.getFullYear()}`;
+        return {...total, [id]: [...(total[id]||[]), curr]};
+    }, {});
+
+
     const getGrid = {
         "day": (
             <CalendarDay
@@ -302,7 +319,7 @@ const Calendar = ({ title }) => {
                 tasks={tasks}
             />
         ),
-        "3days": (
+        "3days": ( // TODO breaks
             <div className={classes.calendarWrapper3}>
                 {info3Days.map((d, id) => <Typography key={id} align="center">{dayNames[d.getDay()]}</Typography>)}
                 {grid3Days.map((d, id) => (
