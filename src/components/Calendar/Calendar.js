@@ -18,6 +18,7 @@ import NavigateNextIcon from '@material-ui/icons/NavigateNext'
 import { teal, lightBlue, cyan, lightGreen, red, brown, grey, purple, pink, orange } from '@material-ui/core/colors'
 
 import CalendarDay from './CalendarDay'
+import AddTaskDialog from './AddTaskDialog'
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -252,6 +253,7 @@ const Calendar = ({ title }) => {
     const theme = useTheme();
     const [view, setView] = useState("month"); //day, 3days, week, month 
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const [alertVisibility, setAlertVisibility] = useState(false);
 
     const day = selectedDate.getDate();
     const month = selectedDate.getMonth();
@@ -383,6 +385,12 @@ const Calendar = ({ title }) => {
 
     return (
         <div className={classes.root}>
+            <AddTaskDialog
+                isOpen={alertVisibility}
+                addTask={() => {}} //TODO
+                handleClose={() => setAlertVisibility(false)}
+                selectedDate={selectedDate}
+            />
             <Toolbar disableGutters> 
                 <Typography id="tableTitle" className={classes.title} variant="h6" noWrap> 
                     {title}
@@ -390,7 +398,7 @@ const Calendar = ({ title }) => {
                 <Button
                     variant="contained"
                     size="large"
-                    onClick={() => {}}
+                    onClick={() => setAlertVisibility(true)}
                     startIcon={<AddIcon />}
                 >
                     Add Task
