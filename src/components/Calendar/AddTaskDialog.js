@@ -32,6 +32,7 @@ const useStyles = makeStyles(theme => ({
         marginRight: -theme.spacing(1.5), 
     },
     select: {
+        marginTop: theme.spacing(0.5), 
         marginBottom: theme.spacing(2), 
     },
     text: {

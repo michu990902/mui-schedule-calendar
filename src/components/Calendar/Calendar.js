@@ -15,11 +15,12 @@ import { getMonthGrid } from '../../lib/calendar'
 import AddIcon from '@material-ui/icons/Add'
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore'
 import NavigateNextIcon from '@material-ui/icons/NavigateNext'
-import { teal, lightBlue, cyan, lightGreen, red, brown, grey, purple, pink, orange } from '@material-ui/core/colors'
 
 import CalendarDay from './CalendarDay'
 import AddTaskDialog from './AddTaskDialog'
-import { timeDiff } from '../../lib/calendar'
+import { timeDiff, getTime } from '../../lib/calendar'
+
+import { testData } from './testData'
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -144,117 +145,13 @@ const monthNames = [
     "December",
 ];
 
-const tasks = [
-    {
-        id: 1,
-        date: "3/5/2021",
-        startAt: "8:00 AM",
-        endAt: "9:30 PM",
-        duration: "1:30",
-        title: "Test task",
-        description: "Test task",
-        color: lightBlue[800],
-        break: "0:30",
-    },
-    {
-        id: 2,
-        date: "3/5/2021",
-        startAt: "8:00 AM",
-        endAt: "9:30 PM",
-        duration: "0:10",
-        title: "Test task 2",
-        description: "Test task 2",
-        color: cyan[800],
-    },
-    {
-        id: 3,
-        date: "3/5/2021",
-        startAt: "8:00 AM",
-        endAt: "9:30 PM",
-        duration: "0:10",
-        title: "Test task 3",
-        description: "Test task 3",
-        color: teal[700],
-        break: "0:15",
-    },
-    {
-        id: 4,
-        date: "3/5/2021",
-        startAt: "8:00 AM",
-        endAt: "9:30 PM",
-        duration: "0:10",
-        title: "Test task 4",
-        description: "Test task 4",
-        color: lightGreen[800],
-    },
-    {
-        id: 5,
-        date: "3/5/2021",
-        startAt: "8:00 AM",
-        endAt: "9:30 PM",
-        duration: "0:10",
-        title: "Test task 5",
-        description: "Test task 5",
-        color: red[700],
-    },
-    {
-        id: 6,
-        date: "3/5/2021",
-        startAt: "8:00 AM",
-        endAt: "9:30 PM",
-        duration: "0:10",
-        title: "Test task 6",
-        description: "Test task 6",
-        color: brown[700],
-    },
-    {
-        id: 7,
-        date: "3/5/2021",
-        startAt: "8:00 AM",
-        endAt: "9:30 PM",
-        duration: "0:10",
-        title: "Test task 7",
-        description: "Test task 7",
-        color: purple[600],
-    },
-    {
-        id: 8,
-        date: "3/5/2021",
-        startAt: "8:00 AM",
-        endAt: "9:30 PM",
-        duration: "0:10",
-        title: "Test task 8",
-        description: "Test task 8",
-        color: grey[800],
-    },
-    {
-        id: 9,
-        date: "3/5/2021",
-        startAt: "8:00 AM",
-        endAt: "9:30 PM",
-        duration: "0:10",
-        title: "Test task 9",
-        description: "Test task 9",
-        color: pink[700],
-    },
-    {
-        id: 10,
-        date: "3/5/2021",
-        startAt: "8:00 AM",
-        endAt: "9:30 PM",
-        duration: "0:10",
-        title: "Test task 10",
-        description: "Test task 10",
-        color: orange[900],
-    },
-];
-
 const Calendar = ({ title }) => {
     const classes = useStyles();
     const theme = useTheme();
     const [view, setView] = useState("month"); //day, 3days, week, month 
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [alertVisibility, setAlertVisibility] = useState(false);
+    const [tasks, setTasks] = useState(testData);
 
     const day = selectedDate.getDate();
     const month = selectedDate.getMonth();
@@ -294,14 +191,13 @@ const Calendar = ({ title }) => {
     const handleToday = () => {
         setSelectedDate(new Date());
     }
-
     
     const groupTasks = tasks.reduce((total, curr, id) => {
         const prevTask = total[id-1];
         if(prevTask){
             const diff = timeDiff(prevTask.endAt, curr.startAt);
-            if(diff.hours > 0 || diff.minutes > 15){ // only > 15 minutes breaks
-                curr.break = diff.label;
+            if(diff.hours > 0 || diff.minutes > 14){ // only > 14 minutes breaks
+                total[id-1].break = diff;
             }
         }
         return [...total, curr];
@@ -310,16 +206,15 @@ const Calendar = ({ title }) => {
         return {...total, [id]: [...(total[id]||[]), curr]};
     }, {});
 
-
     const getGrid = {
         "day": (
             <CalendarDay
                 day={day}
                 isCurrentDate={isCurrDate({ year, month, day })}
-                tasks={tasks}
+                tasks={groupTasks[`${day}/${month}/${year}`]||[]}
             />
         ),
-        "3days": ( // TODO breaks
+        "3days": (
             <div className={classes.calendarWrapper3}>
                 {info3Days.map((d, id) => <Typography key={id} align="center">{dayNames[d.getDay()]}</Typography>)}
                 {grid3Days.map((d, id) => (
@@ -327,7 +222,7 @@ const Calendar = ({ title }) => {
                         <div className={isCurrDate(d) ? classes.selectedDayRing : classes.dayRing}>
                             {d.day}
                         </div>
-                        {tasks && tasks.map(t => (
+                        {(groupTasks[`${d.day}/${d.month}/${d.year}`]||[]).map((t, index) => (
                             <>
                                 <Paper
                                     key={t.id}
@@ -338,9 +233,11 @@ const Calendar = ({ title }) => {
                                     }}
                                 >
                                     <Typography variant="body2">{t.title}</Typography>
-                                    <Typography variant="caption">{`${t.startAt} - ${t.endAt} (${t.duration})`}</Typography>
+                                    <Typography variant="caption">{`${getTime(t.startAt)} - ${getTime(t.endAt)} (${t.duration.label})`}</Typography>
                                 </Paper>
-                                {t.break && <div className={classes.break}>{t.break}</div>}
+                                {t.break
+                                 && index < (groupTasks[`${d.day}/${d.month}/${d.year}`]||[]).length -1
+                                 && <div className={classes.break}>{t.break.label}</div>}
                             </>
                         ))}
                     </Paper>
@@ -356,7 +253,7 @@ const Calendar = ({ title }) => {
                         >
                             {d.day}
                         </div>
-                        {tasks && tasks.map(t => (
+                        {(groupTasks[`${d.day}/${d.month}/${d.year}`]||[]).map(t => (
                             <Paper
                                 key={t.id}
                                 className={classes.task} 
@@ -366,7 +263,7 @@ const Calendar = ({ title }) => {
                                 }}
                             >
                                 <Typography variant="body2">{t.title}</Typography>
-                                <Typography variant="caption">{`${t.startAt} - ${t.endAt} (${t.duration})`}</Typography>
+                                <Typography variant="caption">{`${getTime(t.startAt)} - ${getTime(t.endAt)} (${t.duration.label})`}</Typography>
                             </Paper>
                         ))}
                     </Paper>
@@ -382,7 +279,7 @@ const Calendar = ({ title }) => {
                         >
                             {d.day}
                         </div>
-                        {tasks && tasks.map(t => (
+                        {(groupTasks[`${d.day}/${d.month}/${d.year}`]||[]).map(t => (
                             <Paper 
                                 key={t.id}
                                 className={classes.task} 
@@ -391,7 +288,7 @@ const Calendar = ({ title }) => {
                                     color: theme.palette.getContrastText(t.color) 
                                 }}
                             >
-                                <Typography variant="caption">{`${t.startAt} - ${t.title}`}</Typography>
+                                <Typography variant="caption">{`${getTime(t.startAt)} - ${t.title}`}</Typography>
                             </Paper>
                         ))}
                     </Paper>

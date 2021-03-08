@@ -44,6 +44,7 @@ export const getMonthGrid = (year, month) => {
 };
 
 const addZero = value => ('0'+value).slice(-2);
+export const getTime = date => `${date.getHours()}:${addZero(date.getMinutes())}`;
 
 export const timeDiff = (from, to) => {
     const diffMin = Math.ceil(Math.ceil((to - from) / 1000) / 60);

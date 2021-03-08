@@ -14,6 +14,7 @@ import {
 } from '@material-ui/lab'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import { useTimeChangeRefresh } from '../../hooks/useTimeChangeRefresh'
+import { getTime } from '../../lib/calendar'
 
 const useStyles = makeStyles(theme => ({
     weekDay: {
@@ -65,6 +66,10 @@ const useStyles = makeStyles(theme => ({
         paddingTop: 100,
         paddingBottom: 100,
     },
+    timeline: {
+        width: '50%',
+        // TODO responsive
+    },
 }));
 
 
@@ -73,21 +78,32 @@ const CalendarDay = ({ day, isCurrentDate, tasks }) => {
     const theme = useTheme();
     useTimeChangeRefresh(5000);
 
+    const isNow = (start, end) => {
+        const now = new Date();
+        return now > start && now < end;
+    };
+
+    const endOfDay = date => {
+        const tmp = new Date(date);
+        tmp.setHours(23,59,59,999)
+        return tmp;
+    };
+
     return (
         <Paper className={classes.weekDay}>
             <div className={isCurrentDate ? classes.selectedDayRing : classes.dayRing}>
                 {day}
             </div>
-            {tasks ? (
-                <Timeline>
-                    {tasks.map(t => (
+            {tasks.length > 0 ? (
+                <Timeline className={classes.timeline}>
+                    {tasks.map((t, id) => (
                         <Fragment key={t.id}>
                             <TimelineItem>
                                 <TimelineOppositeContent>
-                                    <Typography color="textSecondary">{`${t.startAt} - ${t.endAt} (${t.duration})`}</Typography>
+                                    <Typography color="textSecondary">{`${getTime(t.startAt)} - ${getTime(t.endAt)} (${t.duration.label})`}</Typography>
                                 </TimelineOppositeContent>
                                 <TimelineSeparator>
-                                    {t.id === 3 // TODO ! if time now
+                                    {isNow(t.startAt, t.endAt)
                                     ? <TimelineDot className={classes.timeNowDot}/> 
                                     : <TimelineDot/>}
                                     <TimelineConnector/>
@@ -111,11 +127,13 @@ const CalendarDay = ({ day, isCurrentDate, tasks }) => {
                                         <Typography>Break</Typography>
                                     </TimelineOppositeContent>
                                     <TimelineSeparator>
-                                        <TimelineDot />
+                                        {isNow(t.endAt, (tasks[id+1]||{}).startAt || endOfDay(t.endAt))
+                                        ? <TimelineDot className={classes.timeNowDot}/> 
+                                        : <TimelineDot/>}
                                         <TimelineConnector />
                                     </TimelineSeparator>
                                     <TimelineContent>
-                                        <Typography align="left">{t.break}</Typography>
+                                        <Typography align="left">{t.break.hours > 0 && `${t.break.hours} hours `}{t.break.minutes > 0 && `${t.break.minutes} minutes`}</Typography>
                                     </TimelineContent>
                                 </TimelineItem>
                             )}
@@ -124,7 +142,8 @@ const CalendarDay = ({ day, isCurrentDate, tasks }) => {
                 </Timeline>
             ) : (
                 <div className={classes.center}>
-                    <Typography variant="h3" component="p">:(</Typography>
+                    <Typography variant="h3" component="p">:)</Typography>
+                    <br/>
                     <Typography>There is nothing to do here</Typography>
                 </div>
             )}
