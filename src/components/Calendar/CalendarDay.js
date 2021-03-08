@@ -1,7 +1,8 @@
 import React, { Fragment } from 'react'
 import {
     Paper,
-    Typography
+    Typography,
+    Link
 } from '@material-ui/core'
 import {
     Timeline,
@@ -45,10 +46,9 @@ const useStyles = makeStyles(theme => ({
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     task: {
-        marginTop: theme.spacing(0.5),
         width: "100%",
         textAlign: "left",
-        paddingLeft: theme.spacing(0.5),
+        padding: theme.spacing(1),
         boxSizing: "border-box",
     },
     "@keyframes timeNowAnimation": {
@@ -100,7 +100,10 @@ const CalendarDay = ({ day, isCurrentDate, tasks }) => {
                         <Fragment key={t.id}>
                             <TimelineItem>
                                 <TimelineOppositeContent>
-                                    <Typography color="textSecondary">{`${getTime(t.startAt)} - ${getTime(t.endAt)} (${t.duration.label})`}</Typography>
+                                    <Typography>{`${getTime(t.startAt)} - ${getTime(t.endAt)}`}</Typography>
+                                    <Typography color="textSecondary">
+                                        {t.duration.hours > 0 && `${t.duration.hours}h `}{t.duration.minutes > 0 && `${t.duration.minutes}m`}
+                                    </Typography>
                                 </TimelineOppositeContent>
                                 <TimelineSeparator>
                                     {isNow(t.startAt, t.endAt)
@@ -117,7 +120,17 @@ const CalendarDay = ({ day, isCurrentDate, tasks }) => {
                                         }}
                                     >
                                         <Typography variant="h6" component="h1">{t.title}</Typography>
-                                        <Typography>{t.description}</Typography>
+                                        {t.description.length > 0 && (
+                                            <Typography>{t.description}</Typography>
+                                        )}
+                                        {t.url.length > 0 && (
+                                            <Link 
+                                                href={t.url}
+                                                rel="noreferrer"
+                                                target="_blank"
+                                                color="inherit"
+                                            >{t.url}</Link>
+                                        )}
                                     </Paper>
                                 </TimelineContent>
                             </TimelineItem>
@@ -133,7 +146,9 @@ const CalendarDay = ({ day, isCurrentDate, tasks }) => {
                                         <TimelineConnector />
                                     </TimelineSeparator>
                                     <TimelineContent>
-                                        <Typography align="left">{t.break.hours > 0 && `${t.break.hours} hours `}{t.break.minutes > 0 && `${t.break.minutes} minutes`}</Typography>
+                                        <Typography align="left">
+                                            {t.break.hours > 0 && `${t.break.hours} hours `}{t.break.minutes > 0 && `${t.break.minutes} minutes`}
+                                        </Typography>
                                     </TimelineContent>
                                 </TimelineItem>
                             )}

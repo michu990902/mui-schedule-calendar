@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect } from 'react'
+import React, { useReducer, useEffect, useState } from 'react'
 import {
     Dialog,
     DialogTitle,
@@ -43,6 +43,27 @@ const useStyles = makeStyles(theme => ({
         justifyContent: 'space-around',
         marginBottom: theme.spacing(2),
     },
+    info: {
+        marginTop: theme.spacing(2), 
+        marginBottom: theme.spacing(2), 
+        width: "100%",
+        height: theme.spacing(4),
+        background: `repeating-linear-gradient(
+            45deg,
+            ${theme.palette.divider},
+            ${theme.palette.divider} 10px,
+            ${theme.palette.action.hover} 10px,
+            ${theme.palette.action.hover} 20px
+        )`,
+        display: 'flex',
+        borderRadius: theme.spacing(0.5),
+    },
+    newTask: {
+        cursor: "pointer",
+        "&:hover": {
+            backgroundColor: `#ff06 !important`,
+        }
+    },
 }));
 
 const radioGenerator = (color, selectedValue, handleChange) => withStyles({
@@ -63,23 +84,98 @@ const radioGenerator = (color, selectedValue, handleChange) => withStyles({
 />)
 
 
-const AddTaskDialog = ({ isOpen, addTask, handleClose, selectedDate }) => {
+const AddTaskDialog = ({ isOpen, addTask, handleClose, selectedDate, tasks }) => {
+    // TODO tasks time validation
     const classes = useStyles();
-    const [state, dispatch] = useReducer((state, action) => ({...state, ...action}), {
-        id: ~~(Math.random() * 1000000), // TODO
-        startAt: new Date(),
-        endAt: new Date(),
-        duration: {
-            hours: 0,
-            minutes: 0,
-        },
-        title: "",
-        url: "",
-        // location: "",
-        // description: "",
-        // reminderNotification: false,
-        color: lightBlue[800],
+
+    const [startAt, setStartAt] = useState(new Date());
+    const [endAt, setEndAt] = useState(new Date());
+    const [duration, setDuration] = useState({
+        hours: 0,
+        minutes: 0,
     });
+    const [title, setTitle] = useState('');
+    const [url, setUrl] = useState('');
+    const [description, setDescription] = useState('');
+    const [color, setColor] = useState(lightBlue[800]);
+
+    const [dayView, setDayView] = useState([]);
+
+    console.log(tasks);
+
+    useEffect(() => {
+        let tmp = tasks[`${startAt.getDate()}/${startAt.getMonth()}/${startAt.getFullYear()}`]||[];
+        if(tmp.length > 0){
+            tmp = tmp.reduce((total, curr) => {
+                const start = curr.startAt.getHours() * 60 + curr.startAt.getMinutes();
+                const end = curr.endAt.getHours() * 60 + curr.endAt.getMinutes();
+                const tmp = [...total, {
+                    start,
+                    end,
+                    duration: end - start,
+                    width: `${(end - start) / 14.4}%`, // 1440 (min in day) / 100
+                    color: curr.color,
+                    break: false,
+                    startAt: curr.startAt,
+                    endAt: curr.endAt,
+                }];
+                if(curr.break){
+                    const dur = curr.break.diffMin;
+                    const tmpD = new Date(
+                        curr.endAt.getFullYear(), 
+                        curr.endAt.getMonth(), 
+                        curr.endAt.getDate(), 
+                        curr.endAt.getHours(),
+                        curr.endAt.getMinutes() + dur,
+                    );
+                    if(curr.endAt < tmpD){
+                        tmp.push({
+                            start: end,
+                            end: end + dur,
+                            duration: dur,
+                            width: `${dur / 14.4}%`,
+                            color: "transparent",
+                            break: true,
+                            startAt: curr.endAt,
+                            endAt: tmpD,
+                        });
+                    }
+                }
+                return tmp;
+            }, []);
+
+            const end = tmp[0];
+            tmp = [
+                {
+                    start: 0,
+                    end,
+                    duration: end.start,
+                    width: `${end.start / 14.4}%`,
+                    color: "transparent",
+                    break: true,
+                    startAt: new Date(
+                        end.startAt.getFullYear(), 
+                        end.startAt.getMonth(), 
+                        end.startAt.getDate(),
+                    ),
+                    endAt: end.startAt,
+                },
+                ...tmp,
+            ];
+            
+            const last = tmp[tmp.length - 1];
+            if(last.break){
+                tmp[tmp.length - 1].endAt = new Date(
+                    last.startAt.getFullYear(), 
+                    last.startAt.getMonth(), 
+                    last.startAt.getDate(),
+                    23,
+                    59
+                )
+            }
+        }
+        setDayView(tmp);
+    }, [tasks, startAt, selectedDate])
 
     useEffect(() => {
         const tmp = new Date(
@@ -90,22 +186,33 @@ const AddTaskDialog = ({ isOpen, addTask, handleClose, selectedDate }) => {
             selectedDate.getHours() + 1 < 24 ? selectedDate.getMinutes() : 59,
         );
 
-        dispatch({
-            startAt: selectedDate,
-            endAt: tmp,
-            duration: timeDiff(selectedDate, tmp),
-        });
-    }, []);
+        setStartAt(selectedDate);
+        setEndAt(tmp);
+        setDuration(timeDiff(selectedDate, tmp));
+    }, [selectedDate]);
 
-    const handleChange = ev => {
-        dispatch({
-            [ev.target.name]: ev.target.value,
-        });
+    const setTaskTime = brk => {
+        console.log(brk);
+        setStartAt(brk.startAt);
+        setEndAt(brk.endAt);
+        setDuration(timeDiff(brk.startAt, brk.endAt));
     };
 
     const handleOk = () => {
-        addTask(state);
+        addTask({
+            id: ~~(Math.random() * 1000000), // TODO
+            startAt,
+            endAt,
+            duration,
+            title,
+            url,
+            description,
+            color
+        });
         handleClose();
+        setTitle('');
+        setUrl('');
+        setDescription('');
     };
 
     const handleStartChange = date => {
@@ -116,32 +223,31 @@ const AddTaskDialog = ({ isOpen, addTask, handleClose, selectedDate }) => {
             date.getHours() + 1 < 24 ? date.getHours() + 1 : date.getHours(),
             date.getHours() + 1 < 24 ? date.getMinutes() : 59,
         );
-        
-        dispatch({
-            startAt: date,
-            endAt: tmp,
-            duration: timeDiff(date, tmp),
-        });
+        setStartAt(date);
+        setEndAt(tmp);
+        setDuration(timeDiff(date, tmp));
     };
 
     const handleEndChange = date => {
-        const tmp = date > state.startAt ? date : state.startAt;
-        dispatch({
-            endAt: tmp,
-            duration: timeDiff(state.startAt, tmp),
-        });
+        const tmp = date > startAt ? date : startAt;
+        setEndAt(date);
+        setDuration(timeDiff(startAt, tmp));
     };
 
-    const LightBlueRadio = radioGenerator(lightBlue[800], state.color, handleChange);
-    const CyanRadio = radioGenerator(cyan[800], state.color, handleChange);
-    const TealRadio = radioGenerator(teal[400], state.color, handleChange);
-    const LightGreenRadio = radioGenerator(lightGreen[800], state.color, handleChange);
-    const RedRadio = radioGenerator(red[700], state.color, handleChange);
-    const BrownRadio = radioGenerator(brown[700], state.color, handleChange);
-    const PurpleRadio = radioGenerator(purple[600], state.color, handleChange);
-    const GreyRadio = radioGenerator(grey[800], state.color, handleChange);
-    const PinkRadio = radioGenerator(pink[800], state.color, handleChange);
-    const OrangeRadio = radioGenerator(orange[800], state.color, handleChange);
+    const handleColor = ev => {
+        setColor(ev.target.value);
+    };
+
+    const LightBlueRadio = radioGenerator(lightBlue[800], color, handleColor);
+    const CyanRadio = radioGenerator(cyan[800], color, handleColor);
+    const TealRadio = radioGenerator(teal[400], color, handleColor);
+    const LightGreenRadio = radioGenerator(lightGreen[800], color, handleColor);
+    const RedRadio = radioGenerator(red[700], color, handleColor);
+    const BrownRadio = radioGenerator(brown[700], color, handleColor);
+    const PurpleRadio = radioGenerator(purple[600], color, handleColor);
+    const GreyRadio = radioGenerator(grey[800], color, handleColor);
+    const PinkRadio = radioGenerator(pink[800], color, handleColor);
+    const OrangeRadio = radioGenerator(orange[800], color, handleColor);
 
     return (
         <Dialog
@@ -169,8 +275,9 @@ const AddTaskDialog = ({ isOpen, addTask, handleClose, selectedDate }) => {
                             label="Title"
                             variant="outlined"
                             fullWidth
-                            value={state.title}
-                            onChange={handleChange}
+                            value={title}
+                            onChange={ev => setTitle(ev.target.value)}
+                            autoComplete="off"
                         />
                     </div>
                     <div className={classes.select}>
@@ -180,8 +287,9 @@ const AddTaskDialog = ({ isOpen, addTask, handleClose, selectedDate }) => {
                             label="Task URL (optional)"
                             variant="outlined"
                             fullWidth
-                            value={state.url}
-                            onChange={handleChange}
+                            value={url}
+                            onChange={ev => setUrl(ev.target.value)}
+                            autoComplete="off"
                         />
                     </div>
                     <div className={classes.flex}>
@@ -203,7 +311,7 @@ const AddTaskDialog = ({ isOpen, addTask, handleClose, selectedDate }) => {
                                 format="MM/dd/yyyy"
                                 margin="normal"
                                 label="Date"
-                                value={state.startAt}
+                                value={startAt}
                                 onChange={handleStartChange}
                                 KeyboardButtonProps={{
                                     'aria-label': 'change date',
@@ -217,9 +325,30 @@ const AddTaskDialog = ({ isOpen, addTask, handleClose, selectedDate }) => {
                                 component="p" 
                                 align="center" 
                                 className={classes.text}
-                            >{state.duration.hours}h {state.duration.minutes}m</Typography>
+                            >{duration.hours}h {duration.minutes}m</Typography>
                         </Grid>
                     </Grid>
+                    <div className={classes.info}>
+                        {dayView.map((t, i) => t.break ? (
+                            <div
+                                key={i}
+                                style={{
+                                    width: t.width,
+                                    backgroundColor: t.color,
+                                }}
+                                className={classes.newTask}
+                                onClick={() => setTaskTime(t)}
+                            ></div>
+                        ) : (
+                            <div
+                                key={i}
+                                style={{
+                                    width: t.width,
+                                    backgroundColor: t.color,
+                                }}
+                            ></div>
+                        ))}
+                    </div>
                     <Grid container spacing={3}>
                         <Grid item xs={6}>
                             <KeyboardTimePicker
@@ -227,7 +356,7 @@ const AddTaskDialog = ({ isOpen, addTask, handleClose, selectedDate }) => {
                                 ampm={false}
                                 margin="normal"
                                 label="Start At"
-                                value={state.startAt}
+                                value={startAt}
                                 onChange={handleStartChange}
                                 KeyboardButtonProps={{
                                     'aria-label': 'change time',
@@ -240,7 +369,7 @@ const AddTaskDialog = ({ isOpen, addTask, handleClose, selectedDate }) => {
                                 ampm={false}
                                 margin="normal"
                                 label="End At"
-                                value={state.endAt}
+                                value={endAt}
                                 onChange={handleEndChange}
                                 KeyboardButtonProps={{
                                     'aria-label': 'change time',

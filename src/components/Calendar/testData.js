@@ -14,6 +14,7 @@ export const testData = [
         title: "Test task",
         description: "Test task",
         color: lightBlue[800],
+        url: "",
     },
     {
         id: 2,
@@ -28,6 +29,7 @@ export const testData = [
         title: "Test task 2",
         description: "Test task 2",
         color: cyan[800],
+        url: "",
     },
     {
         id: 3,
@@ -42,6 +44,7 @@ export const testData = [
         title: "Test task 3",
         description: "Test task 3",
         color: teal[700],
+        url: "",
     },
     {
         id: 4,
@@ -56,6 +59,7 @@ export const testData = [
         title: "Test task 4",
         description: "Test task 4",
         color: lightGreen[800],
+        url: "",
     },
     {
         id: 5,
@@ -70,6 +74,7 @@ export const testData = [
         title: "Test task 5",
         description: "Test task 5",
         color: red[700],
+        url: "",
     },
     {
         id: 6,
@@ -84,6 +89,7 @@ export const testData = [
         title: "Test task 6",
         description: "Test task 6",
         color: brown[700],
+        url: "",
     },
     {
         id: 7,
@@ -98,6 +104,7 @@ export const testData = [
         title: "Test task 7",
         description: "Test task 7",
         color: purple[600],
+        url: "",
     },
     {
         id: 8,
@@ -113,6 +120,7 @@ export const testData = [
         title: "Test task 8",
         description: "Test task 8",
         color: grey[800],
+        url: "",
     },
     {
         id: 9,
@@ -127,6 +135,7 @@ export const testData = [
         title: "Test task 9",
         description: "Test task 9",
         color: pink[700],
+        url: "",
     },
     {
         id: 10,
@@ -141,5 +150,6 @@ export const testData = [
         title: "Test task 10",
         description: "Test task 10",
         color: orange[900],
+        url: "",
     },
 ];
