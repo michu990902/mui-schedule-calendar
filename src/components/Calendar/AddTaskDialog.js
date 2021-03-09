@@ -60,6 +60,7 @@ const useStyles = makeStyles(theme => ({
     },
     newTask: {
         cursor: "pointer",
+        color: "transparent",
         "&:hover": {
             backgroundColor: `#ff06 !important`,
         }
@@ -101,80 +102,8 @@ const AddTaskDialog = ({ isOpen, addTask, handleClose, selectedDate, tasks }) =>
 
     const [dayView, setDayView] = useState([]);
 
-    console.log(tasks);
-
     useEffect(() => {
-        let tmp = tasks[`${startAt.getDate()}/${startAt.getMonth()}/${startAt.getFullYear()}`]||[];
-        if(tmp.length > 0){
-            tmp = tmp.reduce((total, curr) => {
-                const start = curr.startAt.getHours() * 60 + curr.startAt.getMinutes();
-                const end = curr.endAt.getHours() * 60 + curr.endAt.getMinutes();
-                const tmp = [...total, {
-                    start,
-                    end,
-                    duration: end - start,
-                    width: `${(end - start) / 14.4}%`, // 1440 (min in day) / 100
-                    color: curr.color,
-                    break: false,
-                    startAt: curr.startAt,
-                    endAt: curr.endAt,
-                }];
-                if(curr.break){
-                    const dur = curr.break.diffMin;
-                    const tmpD = new Date(
-                        curr.endAt.getFullYear(), 
-                        curr.endAt.getMonth(), 
-                        curr.endAt.getDate(), 
-                        curr.endAt.getHours(),
-                        curr.endAt.getMinutes() + dur,
-                    );
-                    if(curr.endAt < tmpD){
-                        tmp.push({
-                            start: end,
-                            end: end + dur,
-                            duration: dur,
-                            width: `${dur / 14.4}%`,
-                            color: "transparent",
-                            break: true,
-                            startAt: curr.endAt,
-                            endAt: tmpD,
-                        });
-                    }
-                }
-                return tmp;
-            }, []);
-
-            const end = tmp[0];
-            tmp = [
-                {
-                    start: 0,
-                    end,
-                    duration: end.start,
-                    width: `${end.start / 14.4}%`,
-                    color: "transparent",
-                    break: true,
-                    startAt: new Date(
-                        end.startAt.getFullYear(), 
-                        end.startAt.getMonth(), 
-                        end.startAt.getDate(),
-                    ),
-                    endAt: end.startAt,
-                },
-                ...tmp,
-            ];
-            
-            const last = tmp[tmp.length - 1];
-            if(last.break){
-                tmp[tmp.length - 1].endAt = new Date(
-                    last.startAt.getFullYear(), 
-                    last.startAt.getMonth(), 
-                    last.startAt.getDate(),
-                    23,
-                    59
-                )
-            }
-        }
-        setDayView(tmp);
+        setDayView(tasks[`${startAt.getDate()}/${startAt.getMonth()}/${startAt.getFullYear()}`]||[]);
     }, [tasks, startAt, selectedDate])
 
     useEffect(() => {
@@ -192,7 +121,6 @@ const AddTaskDialog = ({ isOpen, addTask, handleClose, selectedDate, tasks }) =>
     }, [selectedDate]);
 
     const setTaskTime = brk => {
-        console.log(brk);
         setStartAt(brk.startAt);
         setEndAt(brk.endAt);
         setDuration(timeDiff(brk.startAt, brk.endAt));
@@ -329,12 +257,11 @@ const AddTaskDialog = ({ isOpen, addTask, handleClose, selectedDate, tasks }) =>
                         </Grid>
                     </Grid>
                     <div className={classes.info}>
-                        {dayView.map((t, i) => t.break ? (
+                        {dayView.map((t, i) => t.isBreak ? (
                             <div
                                 key={i}
                                 style={{
                                     width: t.width,
-                                    backgroundColor: t.color,
                                 }}
                                 className={classes.newTask}
                                 onClick={() => setTaskTime(t)}

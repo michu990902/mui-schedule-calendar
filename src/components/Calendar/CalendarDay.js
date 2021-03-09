@@ -96,63 +96,60 @@ const CalendarDay = ({ day, isCurrentDate, tasks }) => {
             </div>
             {tasks.length > 0 ? (
                 <Timeline className={classes.timeline}>
-                    {tasks.map((t, id) => (
-                        <Fragment key={t.id}>
-                            <TimelineItem>
-                                <TimelineOppositeContent>
-                                    <Typography>{`${getTime(t.startAt)} - ${getTime(t.endAt)}`}</Typography>
-                                    <Typography color="textSecondary">
-                                        {t.duration.hours > 0 && `${t.duration.hours}h `}{t.duration.minutes > 0 && `${t.duration.minutes}m`}
-                                    </Typography>
-                                </TimelineOppositeContent>
-                                <TimelineSeparator>
-                                    {isNow(t.startAt, t.endAt)
-                                    ? <TimelineDot className={classes.timeNowDot}/> 
-                                    : <TimelineDot/>}
-                                    <TimelineConnector/>
-                                </TimelineSeparator>
-                                <TimelineContent>
-                                    <Paper 
-                                        className={classes.task} 
-                                        style={{ 
-                                            backgroundColor: t.color, 
-                                            color: theme.palette.getContrastText(t.color) 
-                                        }}
-                                    >
-                                        <Typography variant="h6" component="h1">{t.title}</Typography>
-                                        {t.description.length > 0 && (
-                                            <Typography>{t.description}</Typography>
-                                        )}
-                                        {t.url.length > 0 && (
-                                            <Link 
-                                                href={t.url}
-                                                rel="noreferrer"
-                                                target="_blank"
-                                                color="inherit"
-                                            >{t.url}</Link>
-                                        )}
-                                    </Paper>
-                                </TimelineContent>
-                            </TimelineItem>
-                            {t.break && (
-                                <TimelineItem>
-                                    <TimelineOppositeContent>
-                                        <Typography>Break</Typography>
-                                    </TimelineOppositeContent>
-                                    <TimelineSeparator>
-                                        {isNow(t.endAt, (tasks[id+1]||{}).startAt || endOfDay(t.endAt))
-                                        ? <TimelineDot className={classes.timeNowDot}/> 
-                                        : <TimelineDot/>}
-                                        <TimelineConnector />
-                                    </TimelineSeparator>
-                                    <TimelineContent>
-                                        <Typography align="left">
-                                            {t.break.hours > 0 && `${t.break.hours} hours `}{t.break.minutes > 0 && `${t.break.minutes} minutes`}
-                                        </Typography>
-                                    </TimelineContent>
-                                </TimelineItem>
-                            )}
-                        </Fragment>
+                    {tasks.map((t, id) => t.isBreak ? (
+                        <TimelineItem key={id}>
+                            <TimelineOppositeContent>
+                                <Typography>Break</Typography>
+                            </TimelineOppositeContent>
+                            <TimelineSeparator>
+                                {isNow(t.endAt, (tasks[id+1]||{}).startAt || endOfDay(t.endAt))
+                                ? <TimelineDot className={classes.timeNowDot}/> 
+                                : <TimelineDot/>}
+                                <TimelineConnector />
+                            </TimelineSeparator>
+                            <TimelineContent>
+                                <Typography align="left">
+                                    {t.info.hours > 0 && `${t.info.hours} hours `}{t.info.minutes > 0 && `${t.info.minutes} minutes`}
+                                </Typography>
+                            </TimelineContent>
+                        </TimelineItem>
+                    ) : (
+                        <TimelineItem key={id}>
+                            <TimelineOppositeContent>
+                                <Typography>{`${getTime(t.startAt)} - ${getTime(t.endAt)}`}</Typography>
+                                <Typography color="textSecondary">
+                                    {t.duration.hours > 0 && `${t.duration.hours}h `}{t.duration.minutes > 0 && `${t.duration.minutes}m`}
+                                </Typography>
+                            </TimelineOppositeContent>
+                            <TimelineSeparator>
+                                {isNow(t.startAt, t.endAt)
+                                ? <TimelineDot className={classes.timeNowDot}/> 
+                                : <TimelineDot/>}
+                                <TimelineConnector/>
+                            </TimelineSeparator>
+                            <TimelineContent>
+                                <Paper 
+                                    className={classes.task} 
+                                    style={{ 
+                                        backgroundColor: t.color, 
+                                        color: theme.palette.getContrastText(t.color) 
+                                    }}
+                                >
+                                    <Typography variant="h6" component="h1">{t.title}</Typography>
+                                    {t.description.length > 0 && (
+                                        <Typography>{t.description}</Typography>
+                                    )}
+                                    {t.url.length > 0 && (
+                                        <Link 
+                                            href={t.url}
+                                            rel="noreferrer"
+                                            target="_blank"
+                                            color="inherit"
+                                        >{t.url}</Link>
+                                    )}
+                                </Paper>
+                            </TimelineContent>
+                        </TimelineItem>
                     ))}
                 </Timeline>
             ) : (

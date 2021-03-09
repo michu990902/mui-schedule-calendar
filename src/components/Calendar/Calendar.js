@@ -18,7 +18,7 @@ import NavigateNextIcon from '@material-ui/icons/NavigateNext'
 
 import CalendarDay from './CalendarDay'
 import AddTaskDialog from './AddTaskDialog'
-import { timeDiff, getTime } from '../../lib/calendar'
+import { timeDiff, getTime, groupTasks } from '../../lib/calendar'
 
 import { testData } from './testData'
 
@@ -145,22 +145,6 @@ const monthNames = [
     "December",
 ];
 
-const groupTasks = tasks => tasks.reduce((total, curr, id) => {
-    const prevTask = total[id-1];
-    if(prevTask){
-        const diff = timeDiff(prevTask.endAt, curr.startAt);
-        // console.log("error", prevTask.endAt, curr.startAt, diff)
-        // WTF not exist
-        if(diff.hours > 0 || diff.minutes > 14){ // only > 14 minutes breaks
-            total[id-1].break = diff;
-        }
-    }
-    return [...total, curr];
-}, []).reduce((total, curr) => {
-    const id = `${curr.startAt.getDate()}/${curr.startAt.getMonth()}/${curr.startAt.getFullYear()}`;
-    return {...total, [id]: [...(total[id]||[]), curr]};
-}, {});
-
 const Calendar = ({ title }) => {
     const classes = useStyles();
     const theme = useTheme();
@@ -171,21 +155,7 @@ const Calendar = ({ title }) => {
     const [groupedTasks, setGroupedTasks] = useState({});
 
     useEffect(() => {
-        const tmp = tasks.sort((a ,b) => {
-            if(a.startAt < b.startAt) return -1;
-            if(a.startAt > b.startAt) return 1;
-            return 0;
-        });
-        if(tmp.length > 0){
-            const lt = tmp[tmp.length - 1];
-            tmp[tmp.length - 1].break = timeDiff(
-                lt.endAt, 
-                new Date(lt.endAt.getFullYear(), lt.endAt.getMonth(), lt.endAt.getDate(), 29, 59, 59)
-            );
-            setGroupedTasks(groupTasks(tmp));
-        }else{
-            setGroupedTasks({});
-        }
+        setGroupedTasks(groupTasks(tasks));
     }, [tasks])
 
     const day = selectedDate.getDate();
@@ -247,22 +217,27 @@ const Calendar = ({ title }) => {
                         <div className={isCurrDate(d) ? classes.selectedDayRing : classes.dayRing}>
                             {d.day}
                         </div>
-                        {(groupedTasks[`${d.day}/${d.month}/${d.year}`]||[]).map((t, index) => (
-                            <Fragment key={t.id}>
-                                <Paper
-                                    className={classes.task} 
-                                    style={{ 
-                                        backgroundColor: t.color, 
-                                        color: theme.palette.getContrastText(t.color) 
-                                    }}
-                                >
-                                    <Typography variant="body2">{t.title}</Typography>
-                                    <Typography variant="caption">{`${getTime(t.startAt)} - ${getTime(t.endAt)} (${t.duration.label})`}</Typography>
-                                </Paper>
-                                {t.break
-                                 && index < (groupedTasks[`${d.day}/${d.month}/${d.year}`]||[]).length -1
-                                 && <div className={classes.break}>{t.break.label}</div>}
-                            </Fragment>
+                        {(groupedTasks[`${d.day}/${d.month}/${d.year}`]||[])
+                        .slice(1, -1)
+                        .map((t, index) => t.isBreak ? (
+                            <div
+                                key={index}
+                                className={classes.break}
+                            >
+                                {t.info.label}
+                            </div>
+                        ) : (
+                            <Paper
+                                key={index}
+                                className={classes.task} 
+                                style={{ 
+                                    backgroundColor: t.color, 
+                                    color: theme.palette.getContrastText(t.color) 
+                                }}
+                            >
+                                <Typography variant="body2">{t.title}</Typography>
+                                <Typography variant="caption">{`${getTime(t.startAt)} - ${getTime(t.endAt)} (${t.duration.label})`}</Typography>
+                            </Paper>
                         ))}
                     </Paper>
                 ))}
@@ -277,7 +252,9 @@ const Calendar = ({ title }) => {
                         >
                             {d.day}
                         </div>
-                        {(groupedTasks[`${d.day}/${d.month}/${d.year}`]||[]).map(t => (
+                        {(groupedTasks[`${d.day}/${d.month}/${d.year}`]||[])
+                        .filter(t => !t.isBreak)
+                        .map(t => (
                             <Paper
                                 key={t.id}
                                 className={classes.task} 
@@ -303,7 +280,9 @@ const Calendar = ({ title }) => {
                         >
                             {d.day}
                         </div>
-                        {(groupedTasks[`${d.day}/${d.month}/${d.year}`]||[]).map(t => (
+                        {(groupedTasks[`${d.day}/${d.month}/${d.year}`]||[])
+                        .filter(t => !t.isBreak)
+                        .map(t => (
                             <Paper 
                                 key={t.id}
                                 className={classes.task} 
