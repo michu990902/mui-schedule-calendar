@@ -1,15 +1,15 @@
 # Material-UI Schedule
 ## Day view
-![Table on PC](https://raw.githubusercontent.com/michu990902/mui-schedule-calendar/master/screenshots/1.png)
+![Day view](https://raw.githubusercontent.com/michu990902/mui-schedule-calendar/master/screenshots/1.PNG)
 ## Current day view
-![Table on PC](https://raw.githubusercontent.com/michu990902/mui-schedule-calendar/master/screenshots/2.png)
+![Current day view](https://raw.githubusercontent.com/michu990902/mui-schedule-calendar/master/screenshots/2.PNG)
 ## 3 days view
-![Table on PC](https://raw.githubusercontent.com/michu990902/mui-schedule-calendar/master/screenshots/3.png)
+![3 days view](https://raw.githubusercontent.com/michu990902/mui-schedule-calendar/master/screenshots/3.PNG)
 ## Week view
-![Table on PC](https://raw.githubusercontent.com/michu990902/mui-schedule-calendar/master/screenshots/4.png)
+![Week view](https://raw.githubusercontent.com/michu990902/mui-schedule-calendar/master/screenshots/4.PNG)
 ## Month view
-![Table on PC](https://raw.githubusercontent.com/michu990902/mui-schedule-calendar/master/screenshots/5.png)
+![Month view](https://raw.githubusercontent.com/michu990902/mui-schedule-calendar/master/screenshots/5.PNG)
 ## New task form
-![Table on PC](https://raw.githubusercontent.com/michu990902/mui-schedule-calendar/master/screenshots/6.png)
+![New task form](https://raw.githubusercontent.com/michu990902/mui-schedule-calendar/master/screenshots/6.PNG)
 ## Responsive
 ### Work in progress...
