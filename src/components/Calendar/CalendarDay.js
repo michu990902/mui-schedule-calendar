@@ -102,7 +102,7 @@ const CalendarDay = ({ day, isCurrentDate, tasks }) => {
                                 <Typography>Break</Typography>
                             </TimelineOppositeContent>
                             <TimelineSeparator>
-                                {isNow(t.endAt, (tasks[id+1]||{}).startAt || endOfDay(t.endAt))
+                                {isNow(t.startAt, t.endAt)
                                 ? <TimelineDot className={classes.timeNowDot}/> 
                                 : <TimelineDot/>}
                                 <TimelineConnector />
